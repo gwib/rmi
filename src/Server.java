@@ -1,15 +1,83 @@
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.sql.*;
 
 
-public class Server extends UnicastRemoteObject implements ServerInterface {
+public class Server implements ServerInterface {
 
     private static final  long serialVersionUID = 172118;
 
     protected Server() throws RemoteException{
         super();
+    }
+
+    @Override
+    public String welcome() throws RemoteException {
+        String welcomeMsg = "*********************************************************\n"
+                + "** Welcome to this Authentication Server!\n"
+                + "What would you like to do?"
+                + "** 1.Create new user\n** 2.Log in\n** 4.Log out\n** 5.Terminate\n"
+                + "*********************************************************\n";
+
+        return welcomeMsg;
+    }
+
+    @Override
+    public boolean newUser(String userName, String pw) throws RemoteException, NoSuchAlgorithmException, InvalidKeySpecException{
+        System.out.println("REQUEST: Create a user:"+userName);
+        DbConnection db = new DbConnection();
+
+        java.util.Date dt = new java.util.Date();
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        Connection conn = db.connectToMysql();
+        //TODO: use my own hash algorithm and generate salt
+        String hashedPassword = pw;
+        String salt = "asr";
+        
+        try {
+            Statement stmt = conn.createStatement();
+            int id = findLastId(conn)+1;
+            // Creating statement to insert new user to DB
+            String sql = "INSERT INTO userDB VALUES("+ id +","+ userName +"','"+hashedPassword+"','"+salt+"','"+sdf.format(dt)+")";
+            stmt.executeUpdate(sql);
+            conn.close();
+            System.out.println("New User created!\n");
+            return true;
+        } catch (SQLException e) {
+            System.out.println("!!SQL exception while creating a user...");
+            return false;
+        }
+    }
+
+    private int findLastId(Connection conn) throws SQLException{
+        int key;
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT id FROM userDB ORDER BY ID");
+        if (rs.last()) {
+            key = rs.getInt("id");
+        }
+        else{ key=1; }
+        rs.close();
+        return key;
+    }
+
+    @Override
+    public boolean login(String userName, String pw) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public boolean validateSession(String userName) throws RemoteException {
+        return false;
+    }
+
+    @Override
+    public boolean logout(String userName) throws RemoteException {
+        return false;
     }
 
     @Override
@@ -68,6 +136,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
             System.out.println("Server successfully bound to registry");
         }
         catch (RemoteException e){
+            System.err.println("Server exception: "+ e.toString());
             e.printStackTrace();
         }
     }

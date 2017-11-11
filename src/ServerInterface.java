@@ -1,7 +1,24 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+import java.util.*;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
+
 public interface ServerInterface extends Remote{
+
+    //authentication
+    public String welcome() throws RemoteException;
+
+    public boolean newUser(String userName, String pw) throws RemoteException, NoSuchAlgorithmException, InvalidKeySpecException;
+
+    public boolean login(String userName, String pw) throws RemoteException;
+
+    public boolean validateSession(String userName) throws RemoteException;
+
+    public boolean logout(String userName) throws  RemoteException;
 
     // functionalities
 
