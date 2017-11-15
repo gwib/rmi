@@ -12,9 +12,9 @@ public interface ServerInterface extends Remote{
     //authentication
     public String welcome() throws RemoteException;
 
-    public boolean newUser(String userName, String pw) throws RemoteException, NoSuchAlgorithmException, InvalidKeySpecException;
+    public boolean newUser(String userName, char[] pw) throws RemoteException, NoSuchAlgorithmException, InvalidKeySpecException;
 
-    public boolean login(String userName, String pw) throws RemoteException;
+    public boolean login(String userName, char[] pw) throws RemoteException;
 
     public boolean validateSession(String userName) throws RemoteException;
 
